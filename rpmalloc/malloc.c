@@ -13,6 +13,9 @@
 // This file provides overrides for the standard library malloc entry points for C and new/delete operators for C++
 // It also provides automatic initialization/finalization of process and threads
 //
+#if defined(__TINYC__)
+#include <sys/types.h>
+#endif
 
 #ifndef ARCH_64BIT
 #  if defined(__LLP64__) || defined(__LP64__) || defined(_WIN64)
@@ -213,7 +216,7 @@ void* memalign(size_t alignment, size_t size) RPALIAS(rpmemalign)
 int posix_memalign(void** memptr, size_t alignment, size_t size) RPALIAS(rpposix_memalign)
 void free(void* ptr) RPALIAS(rpfree)
 void cfree(void* ptr) RPALIAS(rpfree)
-#if defined(__ANDROID__)
+#if defined(__ANDROID__) || defined(__FreeBSD__)
 size_t malloc_usable_size(const void* ptr) RPALIAS(rpmalloc_usable_size)
 #else
 size_t malloc_usable_size(void* ptr) RPALIAS(rpmalloc_usable_size)

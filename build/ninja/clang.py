@@ -29,16 +29,16 @@ class ClangToolchain(toolchain.Toolchain):
     #Default variables
     self.sysroot = ''
     if self.target.is_ios():
-      self.deploymenttarget = '9.0'
+      self.deploymenttarget = '15.0'
     if self.target.is_macos():
-      self.deploymenttarget = '10.7'
+      self.deploymenttarget = '12.0'
 
     #Command definitions
     self.cccmd = '$toolchain$cc -MMD -MT $out -MF $out.d $includepaths $moreincludepaths $cflags $carchflags $cconfigflags $cmoreflags $cenvflags -c $in -o $out'
     self.cxxcmd = '$toolchain$cxx -MMD -MT $out -MF $out.d $includepaths $moreincludepaths $cxxflags $carchflags $cconfigflags $cmoreflags $cxxenvflags -c $in -o $out'
     self.ccdeps = 'gcc'
     self.ccdepfile = '$out.d'
-    self.arcmd = self.rmcmd('$out') + ' && $toolchain$ar crs $ararchflags $arflags $arenvflags $out $in'
+    self.arcmd = self.rmcmd('$out') + ' && $toolchain$ar crsD $ararchflags $arflags $arenvflags $out $in'
     if self.target.is_windows():
       self.linkcmd = '$toolchain$link $libpaths $configlibpaths $linkflags $linkarchflags $linkconfigflags $linkenvflags /debug /nologo /subsystem:console /dynamicbase /nxcompat /manifest /manifestuac:\"level=\'asInvoker\' uiAccess=\'false\'\" /tlbid:1 /pdb:$pdbpath /out:$out $in $libs $archlibs $oslibs $frameworks'
       self.dllcmd = self.linkcmd + ' /dll'
@@ -48,10 +48,10 @@ class ClangToolchain(toolchain.Toolchain):
     #Base flags
     self.cflags = ['-D' + project.upper() + '_COMPILE=1',
                    '-funit-at-a-time', '-fstrict-aliasing', '-fvisibility=hidden', '-fno-stack-protector',
-                   '-fomit-frame-pointer', '-fno-math-errno','-ffinite-math-only', '-funsafe-math-optimizations',
+                   '-fno-math-errno','-ffinite-math-only', '-funsafe-math-optimizations',
                    '-fno-trapping-math', '-ffast-math']
     self.cwarnflags = ['-W', '-Werror', '-pedantic', '-Wall', '-Weverything',
-                       '-Wno-c++98-compat', '-Wno-padded', '-Wno-documentation-unknown-command',
+                       '-Wno-c++98-compat', '-Wno-padded', '-Wno-documentation-unknown-command', '-Wno-declaration-after-statement',
                        '-Wno-implicit-fallthrough', '-Wno-static-in-inline', '-Wno-reserved-id-macro', '-Wno-disabled-macro-expansion']
     self.cmoreflags = []
     self.mflags = []
@@ -84,8 +84,13 @@ class ClangToolchain(toolchain.Toolchain):
       self.cflags += ['-D_GNU_SOURCE=1']
       self.linkflags += ['-lpthread']
       self.oslibs += ['m']
-    if not self.target.is_windows():
+    if (not self.target.is_windows()) and (not self.target.is_macos()) and (not self.target.is_ios()):
       self.linkflags += ['-fomit-frame-pointer']
+    if self.target.is_macos() or self.target.is_ios():
+      # Needed for backtrace() system call (implemented as simple frame pointer walk by Apple)
+      self.cflags += ['-fno-omit-frame-pointer']
+    else:
+      self.cflags += ['-fomit-frame-pointer']
 
     self.includepaths = self.prefix_includepaths((includepaths or []) + ['.'])
 
@@ -530,7 +535,7 @@ class ClangToolchain(toolchain.Toolchain):
     return writer.build(os.path.join(outfile, self.buildtarget), 'ar', infiles, variables = localvariables);
 
   def builder_apple_multisharedlib(self, writer, config, arch, targettype, infiles, outfile, variables):
-    return writer.build(os.path.join(outfile, self.buildtarget), 'so', infiles, implicit = self.implicit_deps(config, variables), variables = self.link_variables(config, arch, targettype, variables))
+    return writer.build(os.path.join(outfile, self.buildtarget), 'lipo', infiles, implicit = self.implicit_deps(config, variables), variables = variables)
 
   def builder_apple_multibin(self, writer, config, arch, targettype, infiles, outfile, variables):
     return writer.build(os.path.join(outfile, self.buildtarget), 'lipo', infiles, variables = variables)

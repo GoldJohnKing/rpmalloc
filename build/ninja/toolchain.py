@@ -19,6 +19,11 @@ def check_output(args):
   import subprocess
   return subprocess.check_output(args).decode().strip()
 
+def check_last_output(args):
+  import subprocess
+  output = subprocess.check_output(args).decode().strip()
+  return output.splitlines()[-1]
+
 def supported_toolchains():
   return ['msvc', 'gcc', 'clang', 'intel']
 
@@ -142,7 +147,7 @@ class Toolchain(object):
       else:
         self.archs = [localarch]
     elif self.target.is_macos():
-      self.archs = ['x86-64']
+      self.archs = ['x86-64', 'arm64']
     elif self.target.is_ios():
       self.archs = ['arm7', 'arm64']
     elif self.target.is_raspberrypi():
