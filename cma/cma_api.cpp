@@ -19,7 +19,6 @@ size_t __stdcall MemFlushCache(size_t size)
 
 void __stdcall MemFlushCacheAll(void)
 {
-    //rpmalloc_thread_collect(); // This function has not been implemented yet
 }
 
 size_t __stdcall MemSize(void* mem)

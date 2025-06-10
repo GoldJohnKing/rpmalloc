@@ -109,7 +109,7 @@
 #endif
 #ifndef DISABLE_UNMAP
 //! Disable unmapping memory pages (also enables unlimited cache)
-#define DISABLE_UNMAP             0
+#define DISABLE_UNMAP             1 // Edited, default = 0
 #endif
 #ifndef ENABLE_UNLIMITED_CACHE
 //! Enable unlimited global cache (no unmapping until finalization)
