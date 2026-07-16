@@ -63,6 +63,7 @@ BOOL WINAPI DllMain(HINSTANCE /*hInst*/, DWORD callReason, LPVOID /*lpvReserved*
     {
         rpmalloc_config_t config{};
 		config.enable_huge_pages = 1; // Windows huge pages privilege has been handled by rpmalloc internally
+		config.disable_decommit = 1;
 		rpmalloc_initialize_config(nullptr, &config);
         break;
     }
