@@ -38,11 +38,18 @@
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
-  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Label="UserMacros">
+    <!-- Auto-read version from ..\..\rpmalloc\rpmalloc.h -->
+    <_RpHeader>$(MSBuildThisFileDirectory)..\..\rpmalloc\rpmalloc.h</_RpHeader>
+    <_RpMajor>$([System.Text.RegularExpressions.Regex]::Match($([System.IO.File]::ReadAllText('$(_RpHeader)')), 'RPMALLOC_VERSION_MAJOR\s+(\d+)').Result('$1'))</_RpMajor>
+    <_RpMinor>$([System.Text.RegularExpressions.Regex]::Match($([System.IO.File]::ReadAllText('$(_RpHeader)')), 'RPMALLOC_VERSION_MINOR\s+(\d+)').Result('$1'))</_RpMinor>
+    <_RpPatch>$([System.Text.RegularExpressions.Regex]::Match($([System.IO.File]::ReadAllText('$(_RpHeader)')), 'RPMALLOC_VERSION_PATCH\s+(\d+)').Result('$1'))</_RpPatch>
+    <_RpVersion>v$(_RpMajor)$(_RpMinor)$(_RpPatch)</_RpVersion>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IntDir>$(SolutionDir)$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
     <OutDir>.\bin\x64\</OutDir>
-    <TargetName>rpmalloc_v145</TargetName>
+    <TargetName>rpmalloc_$(_RpVersion)_$([System.DateTime]::Now.ToString(`yyyyMMdd`))</TargetName>
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -72,7 +79,6 @@
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <UseProcessorExtensions>ALDERLAKE</UseProcessorExtensions>
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
-      <CompileAs>CompileAsCpp</CompileAs>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
