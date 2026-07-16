@@ -62,8 +62,8 @@ BOOL WINAPI DllMain(HINSTANCE /*hInst*/, DWORD callReason, LPVOID /*lpvReserved*
     case DLL_PROCESS_ATTACH:
     {
         rpmalloc_config_t config{};
-        config.enable_huge_pages = 1; // Windows huge pages privilege has been handled by rpmalloc internally
-        rpmalloc_initialize_config(&config);
+		config.enable_huge_pages = 1; // Windows huge pages privilege has been handled by rpmalloc internally
+		rpmalloc_initialize_config(nullptr, &config);
         break;
     }
     case DLL_PROCESS_DETACH:
@@ -78,7 +78,7 @@ BOOL WINAPI DllMain(HINSTANCE /*hInst*/, DWORD callReason, LPVOID /*lpvReserved*
     }
     case DLL_THREAD_DETACH:
     {
-        rpmalloc_thread_finalize(0);
+        rpmalloc_thread_finalize();
         break;
     }
     default:
